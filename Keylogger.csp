@@ -1,12 +1,35 @@
+	.EQU @, $028
 	.EQU KEYBOARD_STATUS, $000
 	.EQU KEYBOARD_DATA, $001
+var:	.WORD
+endWord:	.CHAR 'get', STR_LEN
 
+	.EQU @, $000
 	LDX# 000
 POLL_KEYBD:	INB KEYBOARD_STATUS
 	JGE POLL_KEYBD
 	INB KEYBOARD_DATA
-	STA+ $D00
-	ADX# $001
-	CMX# $00A
-	JLT POLL_KEYBD
-	HLT
+	STA ! $D00
+	;;STA+ $D00	;store from ACC to D00/ EDIT
+	STC var	
+	ADX# $001	;increment XR
+	ADF# $001
+	LDA var
+	CMA endWord
+	;;CMA# $078	;compare ACC with 78, hex value for x
+	;;;CMX# $00A	;compare XR with 10 
+	;;JNE POLL_KEYBD	;jump if ACC not equal to value for x
+	JEQ HALT	;jump to halt if EQ = 1
+	CMX# $003
+	JNE POLL_KEYBD	;if no (EQ = 0), jump to POLL_KEYBD
+	LDX# $001	;shifts the letters of var over to be the last 3 chars typed	
+	LDC var		
+	LDX# 000
+	STC var
+	LDX# $002
+	LDC var
+	LDX# $001
+	STC var
+	LDX# $002
+	JMP POLL_KEYBD
+HALT:	HLT

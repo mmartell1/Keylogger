@@ -1,0 +1,43 @@
+LINE ADDR CONTENTS SOURCE LINE
+  1.              	.EQU @, $028
+  2.              	.EQU KEYBOARD_STATUS, $000
+  3.              	.EQU KEYBOARD_DATA, $001
+  4.  028 000000  var:	.WORD
+  5.  029 676574  endWord:	.CHAR 'get', STR_LEN
+  6.              
+  7.              	.EQU @, $000
+  8.  000 010000  	LDX# 000
+  9.  001 702000  POLL_KEYBD:	INB KEYBOARD_STATUS
+ 10.  002 4B2001  	JGE POLL_KEYBD
+ 11.  003 702001  	INB KEYBOARD_DATA
+ 12.  004 043D00  	STA ! $D00
+ 13.              	;;STA+ $D00	;store from ACC to D00/ EDIT
+ 14.  005 512028  	STC var	
+ 15.  006 110001  	ADX# $001	;increment XR
+ 16.  007 130001  	ADF# $001
+ 17.  008 002028  	LDA var
+ 18.  009 202029  	CMA endWord
+ 19.              	;;CMA# $078	;compare ACC with 78, hex value for x
+ 20.              	;;;CMX# $00A	;compare XR with 10 
+ 21.              	;;JNE POLL_KEYBD	;jump if ACC not equal to value for x
+ 22.  00A 482017  	JEQ HALT	;jump to halt if EQ = 1
+ 23.  00B 210003  	CMX# $003
+ 24.  00C 492001  	JNE POLL_KEYBD	;if no (EQ = 0), jump to POLL_KEYBD
+ 25.  00D 010001  	LDX# $001	;shifts the letters of var over to be the last 3 chars typed	
+ 26.  00E 502028  	LDC var		
+ 27.  00F 010000  	LDX# 000
+ 28.  010 512028  	STC var
+ 29.  011 010002  	LDX# $002
+ 30.  012 502028  	LDC var
+ 31.  013 010001  	LDX# $001
+ 32.  014 512028  	STC var
+ 33.  015 010002  	LDX# $002
+ 34.  016 402001  	JMP POLL_KEYBD
+ 35.  017 FFFFFF  HALT:	HLT
+ 36.              
+
+                     SYMBOL TABLE CONTENTS
+
+000029 = ENDWORD         000017 = HALT            000001 = KEYBOARD_DATA   
+000000 = KEYBOARD_STATUS 000001 = POLL_KEYBD      000003 = STR_LEN         
+000028 = VAR             
